@@ -5,18 +5,29 @@ Trains a PyTorch image classification model using device-agnostic code.
 import os
 import torch
 import data_setup, engine, model_builder, utils
+import argparse
 
 from torchvision import transforms
 
-# Setup hyperparameters
-NUM_EPOCHS = 5
-BATCH_SIZE = 32
-HIDDEN_UNITS = 10
-LEARNING_RATE = 0.001
+parser = argparse.ArgumentParser('Train and save an image classification model.')
 
-# Setup directories
-train_dir = "data/pizza_steak_sushi/train"
-test_dir = "data/pizza_steak_sushi/test"
+parser.add_argument('--num_epochs', type=int, default=5)
+parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--hidden_units', type=int, default=10)
+parser.add_argument('--learning_rate', type=float, default=1e-3)
+parser.add_argument('--train_dir', type=str, default="data/pizza_steak_sushi/train")
+parser.add_argument('--test_dir', type=str, default="data/pizza_steak_sushi/test")
+
+
+# # Setup hyperparameters
+# NUM_EPOCHS = 5
+# BATCH_SIZE = 32
+# HIDDEN_UNITS = 10
+# LEARNING_RATE = 0.001
+
+# # Setup directories
+# train_dir = "data/pizza_steak_sushi/train"
+# test_dir = "data/pizza_steak_sushi/test"
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -26,6 +37,13 @@ data_transform = transforms.Compose([
   transforms.Resize((64, 64)),
   transforms.ToTensor()
 ])
+
+args = parser.parse_args()
+train_dir, test_dir = args.train_dir, args.test_dir
+BATCH_SIZE = args.batch_size
+HIDDEN_UNITS = args.hidden_units
+LEARNING_RATE = args.learning_rate
+NUM_EPOCHS = args.num_epochs
 
 # Create DataLoaders with help from data_setup.py
 train_dataloader, test_dataloader, class_names = data_setup.create_dataloaders(
@@ -59,4 +77,4 @@ engine.train(model=model,
 # Save the model with help from utils.py
 utils.save_model(model=model,
                  target_dir="models",
-                 model_name="05_going_modular_script_mode_tinyvgg_model.pth")
+                 model_name="05_going_modular_script_mode_tinyvgg_argparse_model.pth")
